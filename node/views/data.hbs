@@ -4,21 +4,29 @@
   body {
     background: #28293e;
     color: white;
+    height: 100%;
   }
-
   .link {
     color: #4bfeba;
   }
-
+  #map {
+    height: 400px;
+    width: 800px;
+    margin-bottom: 10px;
+  }
   .btn-green {
     background: #4bfeba;
     color: black;
   }
+
+  .header {
+    vertical-align: middle;
+  }
 </style>
 <div id="vehicles" class="data">
   <div id="header">
-    <img class="d-inline" src="/images/halo.full.logo.png" height="120">
-    <h3 class="d-inline">Step 3: Retrieve data</h3>
+    <img class="d-inline header" src="/images/halo.full.logo.png" height="120">
+    <h3 class="d-inline header">Step 3: Retrieve data</h3>
   </div>
   <p>
     Success! You successfully sent a {{type}} request to the {{vehicle.year}} {{vehicle.make}} {{vehicle.model}}.
@@ -31,6 +39,8 @@
       </tr>
     </thead>
     <tbody>
+      <input type="hidden" id="longitude" value={{@root.data.longitude}} />
+      <input type="hidden" id="latitude" value={{@root.data.latitude}} />
       {{#each data}}
         <tr>
           <td>{{@key}}</td>
@@ -40,8 +50,35 @@
     </tbody>
   </table>
 
+  <div id="map"></div>
+
   <div>
     <a href="/vehicles" class="btn btn-primary btn-green" role="button">Make another request</a>
     <a href="/logout" class="btn btn-link link" role="button">Logout</a>
   </div>
 </div>
+
+    <script>
+      var latitude = document.getElementById("latitude").value;
+      var longitude = document.getElementById("longitude").value;
+      var map;
+      function initMap() {
+        if(Math.abs(latitude) && Math.abs(longitude)) {
+          var myLatlng = new google.maps.LatLng(parseFloat(latitude), parseFloat(longitude));
+
+          map = new google.maps.Map(document.getElementById('map'), {
+            center: myLatlng,
+            zoom: 8
+          });
+          var marker = new google.maps.Marker({
+            position: myLatlng,
+          });
+          marker.setMap(map);
+        }
+        else {
+          document.getElementById("map").style.display = "none";
+        }
+      }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyATEnQ2RWxJhYahUL0SCAVGgKLWV5eZ4Eo&callback=initMap"
+      async defer></script>
