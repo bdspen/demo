@@ -11,6 +11,7 @@ const smartcar = require('smartcar');
 const opn = require('opn');
 const url = require('url');
 const validator = require('validator');
+var path = require('path');
 
 // Set Smartcar configuration
 const PORT = envvar.number('PORT', 8000);
@@ -58,6 +59,7 @@ app.engine('.hbs', exphbs({
   extname: '.hbs',
 }));
 app.set('view engine', '.hbs');
+app.use("/public", express.static(path.join(__dirname, 'public')));
 
 /**
  * Render home page with a "Connect your car" button.

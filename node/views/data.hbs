@@ -1,5 +1,25 @@
-<div id="vehicles">
-  <h3>Step 3: Retrieve data</h3>
+<style>
+  .data {
+  }
+  body {
+    background: #28293e;
+    color: white;
+  }
+
+  .link {
+    color: #4bfeba;
+  }
+
+  .btn-green {
+    background: #4bfeba;
+    color: black;
+  }
+</style>
+<div id="vehicles" class="data">
+  <div id="header">
+    <img class="d-inline" src="/images/halo.full.logo.png" height="120">
+    <h3 class="d-inline">Step 3: Retrieve data</h3>
+  </div>
   <p>
     Success! You successfully sent a {{type}} request to the {{vehicle.year}} {{vehicle.make}} {{vehicle.model}}.
   </p>
@@ -21,7 +41,7 @@
   </table>
 
   <div>
-    <a href="/vehicles" class="btn btn-primary" role="button">Make another request</a>
-    <a href="/logout" class="btn btn-link" role="button">Logout</a>
+    <a href="/vehicles" class="btn btn-primary btn-green" role="button">Make another request</a>
+    <a href="/logout" class="btn btn-link link" role="button">Logout</a>
   </div>
 </div>
