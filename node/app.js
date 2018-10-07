@@ -207,10 +207,7 @@ app.post('/request', function(req, res, next) {
       break;
     case 'location':
       instance.location()
-        .then(({data}) => {
-          console.log('data', data);
-          res.render('data', {data, type, vehicle});
-        })
+        .then(({data}) => res.render('data', {data, type, vehicle}))
         .catch(function(err) {
           const message = err.message || 'Failed to get vehicle location.';
           const action = 'fetching vehicle location';
