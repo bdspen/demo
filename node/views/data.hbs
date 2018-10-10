@@ -1,34 +1,12 @@
 <style>
-  .data {
-  }
-  body {
-    background: #28293e;
-    color: white;
-    height: 100%;
-  }
-  .link {
-    color: #4bfeba;
-  }
   #map {
     height: 400px;
     width: 90%;
     margin-bottom: 10px;
     color: black;
   }
-  .btn-green {
-    background: #4bfeba;
-    color: black;
-  }
-
-  .header {
-    vertical-align: middle;
-  }
 </style>
 <div id="vehicles" class="data">
-  <div id="header">
-    <img class="d-inline header" src="/images/halo.full.logo.png" height="120">
-    <h3 class="d-inline header">Step 3: Retrieve data</h3>
-  </div>
   <p>
     Success! You successfully sent a {{type}} request to the {{vehicle.year}} {{vehicle.make}} {{vehicle.model}}.
   </p>
@@ -54,8 +32,8 @@
   <div id="map"></div>
 
   <div>
-    <a href="/vehicles" class="btn btn-primary btn-green" role="button">Make another request</a>
-    <a href="/logout" class="btn btn-link link" role="button">Logout</a>
+    <a href="/vehicles" class="btn btn-primary" role="button">Make another request</a>
+    <a href="/logout" class="btn btn-link" role="button">Logout</a>
   </div>
 </div>
 
