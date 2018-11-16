@@ -144,11 +144,9 @@ app.get('/callback', function(req, res, next) {
  * Renders a list of vehicles. Lets the user select a vehicle and type of
  * request, then sends a POST request to the /request route.
  */
-app.get('/vehicles', function(req, res) {
-  return res.render('vehicles', { vehicles: req.session.vehicles })
+app.get('/vehicles', function(req, res, next) {
+  return res.render('vehicles');
 });
-
-
 
 app.get('/vehicles/all', function (req, res, next) {
   const { access, vehicles } = req.session;
@@ -175,7 +173,7 @@ app.get('/vehicles/all', function (req, res, next) {
       });
 
       return Promise.all(vehiclePromises).then(() =>
-        res.send({ vehicles: req.session.vehicles }))
+        res.render('vehicles', { vehicles: JSON.stringify({ vehicles: req.session.vehicles }) }))
         .catch(function (err) {
           const message = err.message || 'Failed to get vehicle info.';
           const action = 'fetching vehicle info';
@@ -185,7 +183,6 @@ app.get('/vehicles/all', function (req, res, next) {
     });
 
 });
-
 
 
 /**

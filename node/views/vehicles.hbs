@@ -1,5 +1,6 @@
 <div id="vehicles">
-  <form action="/request" method="post">
+  <div id="map"></div>
+  {{!-- <form action="/request" method="post">
     <div class="form-group">
       <label class="label" for="vehicle">Select a vehicle:</label>
       <select class="form-control" id="vehicle" name="vehicleId">
@@ -8,25 +9,35 @@
         {{/each}}
       </select>
     </div>
-
-
-      <div id="map"></div>
-
     <a href="/logout" class="btn btn-link" role="button">Logout</a>
-  </form>
+  </form> --}}
 </div>
 
     <script>
       var map;
       function initMap() {
-        if (Math.abs(latitude) && Math.abs(longitude)) {
-          var myLatlng = new google.maps.LatLng(parseFloat(latitude), parseFloat(longitude));
-          var geocoder = new google.maps.Geocoder;
-          var infowindow = new google.maps.InfoWindow;
+        const vehicles = JSON.parse(this.response);
+        console.log('vehicles', vehicles);
+        if (vehicles) {
           map = new google.maps.Map(document.getElementById('map'), {
-            center: myLatlng,
             zoom: 8
           });
+          for (var id in vehicles){
+            console.log('vehicles', vehicles);
+            generateMarker(vehicles[id]));
+          }
+        }
+        else {
+          document.getElementById("map").style.display = "none";
+        }
+      }
+
+      function generateMarker(vehicle) {
+        console.log('vehicle', vehicle);
+        if (Math.abs(vehicle.location.latitude) && Math.abs(vehicle.location.longitude)) {
+          var myLatlng = new google.maps.LatLng(parseFloat(vehicle.location.latitude), parseFloat(vehicle.location.longitude));
+          var geocoder = new google.maps.Geocoder;
+          var infowindow = new google.maps.InfoWindow;
           var marker = new google.maps.Marker({
             position: myLatlng,
           });
@@ -41,16 +52,15 @@
               }
             }
           });
-
-        }
-        else {
-          document.getElementById("map").style.display = "none";
         }
       }
 
       function reqVehicles(){
-        
+        var oReq = new XMLHttpRequest();
+        oReq.addEventListener("load", initMap);
+        oReq.open("GET", "/vehicles/all");
+        oReq.send();
       }
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyATEnQ2RWxJhYahUL0SCAVGgKLWV5eZ4Eo&callback=initMap"
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyATEnQ2RWxJhYahUL0SCAVGgKLWV5eZ4Eo&callback=reqVehicles"
       async defer></script>
