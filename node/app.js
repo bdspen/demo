@@ -144,41 +144,49 @@ app.get('/callback', function(req, res, next) {
  * Renders a list of vehicles. Lets the user select a vehicle and type of
  * request, then sends a POST request to the /request route.
  */
-app.get('/vehicles', function(req, res, next) {
-  const {access, vehicles} = req.session;
+app.get('/vehicles', function(req, res) {
+  return res.render('vehicles', { vehicles: req.session.vehicles })
+});
+
+
+
+app.get('/vehicles/all', function (req, res, next) {
+  const { access, vehicles } = req.session;
   if (!access) {
     return res.redirect('/');
   }
-  const {accessToken} = access;
+  const { accessToken } = access;
   smartcar.getVehicleIds(accessToken)
-    .then(function(data) {
+    .then(function (data) {
       const vehicleIds = data.vehicles;
       const vehiclePromises = vehicleIds.map(vehicleId => {
         const vehicle = new smartcar.Vehicle(vehicleId, accessToken);
-        req.session.vehicles[vehicleId] = {
-          id: vehicleId,
-        };
-        return vehicle.info();
+        return Promise.all([
+          vehicle.info(),
+          vehicle.location()
+        ])
+          .then(([info, location]) => {
+            req.session.vehicles[vehicleId] = {
+              id: vehicleId,
+              location: location.data,
+              ...info
+            };
+          })
       });
 
-      return Promise.all(vehiclePromises)
-        .then(function(data) {
-          // Add vehicle info to vehicle objects
-          _.forEach(data, vehicle => {
-            const {id: vehicleId} = vehicle;
-            req.session.vehicles[vehicleId] = vehicle;
-          });
-
-          res.render('vehicles', {vehicles: req.session.vehicles});
-        })
-        .catch(function(err) {
+      return Promise.all(vehiclePromises).then(() =>
+        res.send({ vehicles: req.session.vehicles }))
+        .catch(function (err) {
           const message = err.message || 'Failed to get vehicle info.';
           const action = 'fetching vehicle info';
           return redirectToError(res, message, action);
         });
+
     });
 
 });
+
+
 
 /**
  * Triggers a request to the vehicle and renders the response.

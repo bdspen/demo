@@ -4,21 +4,53 @@
       <label class="label" for="vehicle">Select a vehicle:</label>
       <select class="form-control" id="vehicle" name="vehicleId">
         {{#each vehicles}}
-        <option value="{{id}}">{{year}} {{make}} {{model}}</option>
+        <option value="{{id}}">{{year}} {{make}} {{model}} {{location.latitude}} {{location.longitude}}</option>
         {{/each}}
       </select>
     </div>
-    <div class="form-group">
-      <label class="label" for="request">Select a request type:</label>
-      <select class="form-control" id="request" name="requestType">
-        <option value="info">Vehicle info</option>
-        <option value="location">Location</option>
-        <option value="odometer">Odometer</option>
-        <option value="lock">Lock doors</option>
-        <option value="unlock">Unlock doors</option>
-      </select>
-    </div>
-    <button type="submit" class="btn btn-primary">Send request</button>
+
+
+      <div id="map"></div>
+
     <a href="/logout" class="btn btn-link" role="button">Logout</a>
   </form>
 </div>
+
+    <script>
+      var map;
+      function initMap() {
+        if (Math.abs(latitude) && Math.abs(longitude)) {
+          var myLatlng = new google.maps.LatLng(parseFloat(latitude), parseFloat(longitude));
+          var geocoder = new google.maps.Geocoder;
+          var infowindow = new google.maps.InfoWindow;
+          map = new google.maps.Map(document.getElementById('map'), {
+            center: myLatlng,
+            zoom: 8
+          });
+          var marker = new google.maps.Marker({
+            position: myLatlng,
+          });
+          marker.setMap(map);
+
+          geocoder.geocode({ 'location': myLatlng }, function (results, status) {
+            if (status === 'OK') {
+              if (results[0]) {
+                map.setZoom(11);
+                infowindow.setContent(results[0].formatted_address);
+                infowindow.open(map, marker);
+              }
+            }
+          });
+
+        }
+        else {
+          document.getElementById("map").style.display = "none";
+        }
+      }
+
+      function reqVehicles(){
+        
+      }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyATEnQ2RWxJhYahUL0SCAVGgKLWV5eZ4Eo&callback=initMap"
+      async defer></script>
