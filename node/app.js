@@ -173,7 +173,7 @@ app.get('/vehicles/all', function (req, res, next) {
       });
 
       return Promise.all(vehiclePromises).then(() =>
-        res.render('vehicles', { vehicles: JSON.stringify({ vehicles: req.session.vehicles }) }))
+        res.send({ vehicles: { vehicles: req.session.vehicles } }))
         .catch(function (err) {
           const message = err.message || 'Failed to get vehicle info.';
           const action = 'fetching vehicle info';
