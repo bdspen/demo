@@ -3,6 +3,9 @@
     width: 100%;
     height: 800px;
   }
+  body {
+    color: black;
+  }
 </style>
 
 <div id="vehicles">
@@ -30,7 +33,7 @@
         if (vehicles) {
           map = new google.maps.Map(document.getElementById('map'), {
             zoom: 18,
-            center: { lat: -34.397, lng: 150.644 }
+            center: { lat: 37.56241989135742, lng: -107.9727783203125 }
           });
           for (var id in vehicles){
             generateMarker(vehicles[id]);
@@ -55,8 +58,11 @@
             if (status === 'OK') {
               if (results[0]) {
                 map.setZoom(8);
-                infowindow.setContent(results[0].formatted_address);
-                infowindow.open(map, marker);
+                google.maps.event.addListener(marker, 'click', function () {
+                  console.log(results[0].formatted_address);
+                  infowindow.setContent(results[0].formatted_address);
+                  infowindow.open(map, this);
+                }); 
               }
             }
           });
