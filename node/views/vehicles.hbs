@@ -10,17 +10,7 @@
 
 <div id="vehicles">
   <div id="map"></div>
-  {{!-- <form action="/request" method="post">
-    <div class="form-group">
-      <label class="label" for="vehicle">Select a vehicle:</label>
-      <select class="form-control" id="vehicle" name="vehicleId">
-        {{#each vehicles}}
-        <option value="{{id}}">{{year}} {{make}} {{model}} {{location.latitude}} {{location.longitude}}</option>
-        {{/each}}
-      </select>
-    </div>
-    <a href="/logout" class="btn btn-link" role="button">Logout</a>
-  </form> --}}
+  <a href="/logout" class="btn btn-link" role="button">Logout</a>
 </div>
 
 
@@ -60,13 +50,37 @@
                 map.setZoom(8);
                 google.maps.event.addListener(marker, 'click', function () {
                   console.log(results[0].formatted_address);
-                  infowindow.setContent(results[0].formatted_address);
+                  infowindow.setContent(
+                    `<span class="infowindow">${results[0].formatted_address}</span>
+                      <br>
+                      <button onclick="reqUnlock(vehicle.id)" class="btn btn-demo">Unlock</button>
+                      <button onclick="reqLock(vehicle.id)" class="btn btn-demo" >Lock</button>`
+                      
+                  );
                   infowindow.open(map, this);
                 }); 
               }
             }
           });
         }
+      }
+
+      function reqUnlock(vehicleId) {
+        console.log('vehicleId', vehicleId);
+        var oReq = new XMLHttpRequest();
+        oReq.addEventListener("load", function(){});
+        oReq.open("POST", "/request");
+        oReq.setRequestHeader("Content-Type", "application/json");
+        oReq.send(JSON.stringify({ requestType: "unlock", vehicleId }));
+      }
+
+      function reqLock(vehicleId) {
+        console.log('vehicleId', vehicleId);
+        var oReq = new XMLHttpRequest();
+        oReq.addEventListener("load", function () { });
+        oReq.open("POST", "/request");
+        oReq.setRequestHeader("Content-Type", "application/json");
+        oReq.send(JSON.stringify({ requestType: "lock", vehicleId }));
       }
 
       function reqVehicles(){
