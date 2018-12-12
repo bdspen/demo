@@ -1,24 +1,87 @@
-<div id="vehicles">
-  <form action="/request" method="post">
-    <div class="form-group">
-      <label class="label" for="vehicle">Select a vehicle:</label>
-      <select class="form-control" id="vehicle" name="vehicleId">
-        {{#each vehicles}}
-        <option value="{{id}}">{{year}} {{make}} {{model}}</option>
-        {{/each}}
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="label" for="request">Select a request type:</label>
-      <select class="form-control" id="request" name="requestType">
-        <option value="info">Vehicle info</option>
-        <option value="location">Location</option>
-        <option value="odometer">Odometer</option>
-        <option value="lock">Lock doors</option>
-        <option value="unlock">Unlock doors</option>
-      </select>
-    </div>
-    <button type="submit" class="btn btn-primary">Send request</button>
-    <a href="/logout" class="btn btn-link" role="button">Logout</a>
-  </form>
+<style>
+  #map {
+      flex: 2 0 0;
+      max-height: 500px;
+      margin-bottom: 10px;
+  }
+  #vehicle-info {
+    flex: 1 0 0;
+  }
+
+  .content {
+      display: flex;
+      flex-direction: row;
+      height: 100%;
+      width: 100%;
+  }
+</style>
+
+<script>
+
+  var vehicles = '{{{ toJSON vehicles }}}';
+  vehicles = JSON.parse(vehicles);
+  console.log('vehicles', vehicles);
+  var selectedVehicle = '';
+
+  window.initMap = function () {
+    var map = new google.maps.Map(document.getElementById('map'));
+    var markers = generateMarkers(map);
+    markers = addClickHandlers(map, markers);
+    map.fitBounds(generateBounds(markers));
+  }
+
+  // Add markers to the map
+  // Set up markers based on the number of elements within the myPoints array
+  function generateMarkers(map) {
+    return vehicles.map(function (vehicle) {
+      console.log('vehicle', vehicle);
+      var myLatLng = new google.maps.LatLng(vehicle.location.latitude, vehicle.location.longitude);
+      return new google.maps.Marker({
+        position: myLatLng,
+        map: map,
+        title: `${vehicle.year} ${vehicle.make} ${vehicle.model}`
+      });
+    });
+  }
+
+  function addClickHandlers(map, markers){
+    return markers.map(function(marker) {
+      marker.addListener('click', function () {
+        map.setZoom(15);
+        map.setCenter(marker.getPosition());
+      });
+      return marker;
+    });
+  }
+
+  //center and zoom the map to fit the markers locations
+  function generateBounds(markers){
+    var bounds = new google.maps.LatLngBounds();
+    markers.forEach(function (marker) {
+      bounds.extend(marker.getPosition());
+    });
+    return bounds;
+  }
+
+  function findVehicle(){
+
+  }
+
+
+</script>
+
+
+<div class="content">
+  <div id="map"></div>
+  <div id="vehicle-info">
+    <ul>
+      {{#each vehicles}}
+        <li>{{id}} {{year}} {{make}} {{model}}</li>
+      {{/each}}
+    </ul>
+  </div>
 </div>
+<a href="/logout" class="btn btn-link" role="button">Logout</a>
+
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyATEnQ2RWxJhYahUL0SCAVGgKLWV5eZ4Eo&callback=initMap">
+</script>

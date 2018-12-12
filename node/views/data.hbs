@@ -1,11 +1,3 @@
-<style>
-  #map {
-    height: 400px;
-    width: 90%;
-    margin-bottom: 10px;
-    color: black;
-  }
-</style>
 <div id="vehicles" class="data">
   <p>
     Success! You successfully sent a {{type}} request to the {{vehicle.year}} {{vehicle.make}} {{vehicle.model}}.
@@ -29,47 +21,8 @@
     </tbody>
   </table>
 
-  <div id="map"></div>
-
   <div>
     <a href="/vehicles" class="btn btn-primary" role="button">Make another request</a>
     <a href="/logout" class="btn btn-link" role="button">Logout</a>
   </div>
 </div>
-
-    <script>
-      var latitude = document.getElementById("latitude").value;
-      var longitude = document.getElementById("longitude").value;
-      var map;
-      function initMap() {
-        if(Math.abs(latitude) && Math.abs(longitude)) {
-          var myLatlng = new google.maps.LatLng(parseFloat(latitude), parseFloat(longitude));
-          var geocoder = new google.maps.Geocoder;
-          var infowindow = new google.maps.InfoWindow;
-          map = new google.maps.Map(document.getElementById('map'), {
-            center: myLatlng,
-            zoom: 8
-          });
-          var marker = new google.maps.Marker({
-            position: myLatlng,
-          });
-          marker.setMap(map);
-
-          geocoder.geocode({ 'location': myLatlng }, function (results, status) {
-            if (status === 'OK') {
-              if (results[0]) {
-                map.setZoom(11);
-                infowindow.setContent(results[0].formatted_address);
-                infowindow.open(map, marker);
-              }
-            }
-          });
-
-        }
-        else {
-          document.getElementById("map").style.display = "none";
-        }
-      }
-    </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyATEnQ2RWxJhYahUL0SCAVGgKLWV5eZ4Eo&callback=initMap"
-      async defer></script>

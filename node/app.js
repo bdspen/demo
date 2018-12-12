@@ -12,11 +12,20 @@ const opn = require('opn');
 const url = require('url');
 const validator = require('validator');
 var path = require('path');
+var hbs = exphbs.create({
+  defaultLayout: 'main',
+  extname: '.hbs',
+  helpers: {
+    toJSON: function (obj) {
+      return JSON.stringify(obj);
+    }
+  }
+});
 
 // Set Smartcar configuration
-const PORT = envvar.number('PORT', 8000);
-const SMARTCAR_CLIENT_ID = envvar.string('SMARTCAR_CLIENT_ID');
-const SMARTCAR_SECRET = envvar.string('SMARTCAR_SECRET');
+const PORT = 8000;
+const SMARTCAR_CLIENT_ID = 'dd090621-ee83-42f5-b271-fb519dc01a7d';
+const SMARTCAR_SECRET = '2d4dc0c4-8ae0-4a03-8d3d-36e7f81123a5';
 
 // Validate Client ID and Secret are UUIDs
 if (!validator.isUUID(SMARTCAR_CLIENT_ID)) {
@@ -29,7 +38,7 @@ if (!validator.isUUID(SMARTCAR_SECRET)) {
 
 // Redirect uri must be added to the application's allowed redirect uris
 // in the Smartcar developer portal
-const SMARTCAR_REDIRECT_URI = envvar.string('SMARTCAR_REDIRECT_URI', `http://localhost:${PORT}/callback`);
+const SMARTCAR_REDIRECT_URI = 'http://localhost:8000/callback';
 
 // Setting MODE to "development" will show Smartcar's mock vehicle
 const SMARTCAR_MODE = envvar.oneOf('SMARTCAR_MODE', ['test', 'live'], 'test');
@@ -54,10 +63,7 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({
   extended: false
 }));
-app.engine('.hbs', exphbs({
-  defaultLayout: 'main',
-  extname: '.hbs',
-}));
+app.engine('.hbs', hbs.engine);
 app.set('view engine', '.hbs');
 app.use("/public", express.static(path.join(__dirname, 'public')));
 
@@ -128,7 +134,7 @@ app.get('/callback', function(req, res, next) {
   client.exchangeCode(code)
     .then(function(access) {
       req.session = {};
-      req.session.vehicles = {};
+      req.session.vehicles = [];
       req.session.access = access;
       return res.redirect('/vehicles');
     })
@@ -144,40 +150,41 @@ app.get('/callback', function(req, res, next) {
  * Renders a list of vehicles. Lets the user select a vehicle and type of
  * request, then sends a POST request to the /request route.
  */
-app.get('/vehicles', function(req, res, next) {
-  const {access, vehicles} = req.session;
+
+app.get('/vehicles', (req, res, next) => {
+  const { access, vehicles } = req.session;
   if (!access) {
     return res.redirect('/');
   }
-  const {accessToken} = access;
+  const { accessToken } = access;
   smartcar.getVehicleIds(accessToken)
-    .then(function(data) {
+    .then((data) => {
       const vehicleIds = data.vehicles;
       const vehiclePromises = vehicleIds.map(vehicleId => {
         const vehicle = new smartcar.Vehicle(vehicleId, accessToken);
-        req.session.vehicles[vehicleId] = {
-          id: vehicleId,
-        };
-        return vehicle.info();
+        return Promise.all([
+          vehicle.info(),
+          vehicle.location()
+        ])
+          .then(([info, location]) => {
+            req.session.vehicles.push({
+              id: vehicleId,
+              location: location.data,
+              ...info
+            });
+          })
       });
 
-      return Promise.all(vehiclePromises)
-        .then(function(data) {
-          // Add vehicle info to vehicle objects
-          _.forEach(data, vehicle => {
-            const {id: vehicleId} = vehicle;
-            req.session.vehicles[vehicleId] = vehicle;
-          });
-
-          res.render('vehicles', {vehicles: req.session.vehicles});
-        })
-        .catch(function(err) {
+      return Promise.all(vehiclePromises).then(() => {
+        res.render('vehicles', { vehicles:  req.session.vehicles })
+      })
+        .catch(function (err) {
           const message = err.message || 'Failed to get vehicle info.';
           const action = 'fetching vehicle info';
           return redirectToError(res, message, action);
         });
-    });
 
+    });
 });
 
 /**
