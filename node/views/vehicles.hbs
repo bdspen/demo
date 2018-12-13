@@ -6,8 +6,15 @@
   }
   #vehicle-info {
     flex: 1 0 0;
+    margin-left: 10px;
+    border-radius: 8px;
+    background: white;
+    color: #28293e;
   }
-
+  #vehicle-select{
+    max-width: 33%;
+    margin-bottom: 10px;
+  }
   .content {
       display: flex;
       flex-direction: row;
@@ -20,11 +27,11 @@
 
   var vehicles = '{{{ toJSON vehicles }}}';
   vehicles = JSON.parse(vehicles);
+  var map;
   console.log('vehicles', vehicles);
-  var selectedVehicle = '';
 
   window.initMap = function () {
-    var map = new google.maps.Map(document.getElementById('map'));
+    map = new google.maps.Map(document.getElementById('map'));
     var markers = generateMarkers(map);
     markers = addClickHandlers(map, markers);
     map.fitBounds(generateBounds(markers));
@@ -39,6 +46,7 @@
       return new google.maps.Marker({
         position: myLatLng,
         map: map,
+        id: vehicle.id,
         title: `${vehicle.year} ${vehicle.make} ${vehicle.model}`
       });
     });
@@ -47,8 +55,7 @@
   function addClickHandlers(map, markers){
     return markers.map(function(marker) {
       marker.addListener('click', function () {
-        map.setZoom(15);
-        map.setCenter(marker.getPosition());
+        selectVehicleFromMap(map, marker);
       });
       return marker;
     });
@@ -63,22 +70,43 @@
     return bounds;
   }
 
-  function findVehicle(){
-
+  function getVehicleById(vehicleId){
+    return vehicles.find(function(vehicle){
+      return vehicle.id = vehicleId;
+    });
   }
 
+  function generateCarInfo(vehicleId){
+    var vehicle = getVehicleById(vehicleId);
+    console.log('vehicle', vehicle);
+    // var vInfoList = $('#vehicle-info');
+    $('#vehicle-title').text(vehicle.year + " " + vehicle.make + " " + vehicle.model);
+  }
+
+  function selectVehicleFromMap(marker) {
+    map.setZoom(15);
+    map.setCenter(marker.getPosition());
+    $('#vehicle-select').val(marker.id);
+    selectVehicle(marker.id);
+  }
+
+  function selectVehicle (vehicleId) {
+    console.log('vehicleId', vehicleId);
+    generateCarInfo(vehicleId);
+  }
 
 </script>
 
 
+<select onchange="selectVehicle(this.value);" class="form-control" id="vehicle-select" name="vehicleId">
+  {{#each vehicles}}
+    <option value="{{id}}">{{year}} {{make}} {{model}}</option>
+  {{/each}}
+</select>
 <div class="content">
   <div id="map"></div>
   <div id="vehicle-info">
-    <ul>
-      {{#each vehicles}}
-        <li>{{id}} {{year}} {{make}} {{model}}</li>
-      {{/each}}
-    </ul>
+    <h2 id="vehicle-title"></h2>
   </div>
 </div>
 <a href="/logout" class="btn btn-link" role="button">Logout</a>

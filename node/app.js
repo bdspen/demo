@@ -157,34 +157,39 @@ app.get('/vehicles', (req, res, next) => {
     return res.redirect('/');
   }
   const { accessToken } = access;
-  smartcar.getVehicleIds(accessToken)
-    .then((data) => {
-      const vehicleIds = data.vehicles;
-      const vehiclePromises = vehicleIds.map(vehicleId => {
-        const vehicle = new smartcar.Vehicle(vehicleId, accessToken);
-        return Promise.all([
-          vehicle.info(),
-          vehicle.location()
-        ])
-          .then(([info, location]) => {
-            req.session.vehicles.push({
-              id: vehicleId,
-              location: location.data,
-              ...info
-            });
-          })
-      });
-
-      return Promise.all(vehiclePromises).then(() => {
-        res.render('vehicles', { vehicles:  req.session.vehicles })
-      })
-        .catch(function (err) {
-          const message = err.message || 'Failed to get vehicle info.';
-          const action = 'fetching vehicle info';
-          return redirectToError(res, message, action);
+  if(req.session.vehicles.length < 1) {
+    smartcar.getVehicleIds(accessToken)
+      .then((data) => {
+        const vehicleIds = data.vehicles;
+        const vehiclePromises = vehicleIds.map(vehicleId => {
+          const vehicle = new smartcar.Vehicle(vehicleId, accessToken);
+          return Promise.all([
+            vehicle.info(),
+            vehicle.location()
+          ])
+            .then(([info, location]) => {
+              req.session.vehicles.push({
+                id: vehicleId,
+                location: location.data,
+                ...info
+              });
+            })
         });
 
-    });
+        return Promise.all(vehiclePromises).then(() => {
+          res.render('vehicles', { vehicles:  req.session.vehicles })
+        })
+          .catch(function (err) {
+            const message = err.message || 'Failed to get vehicle info.';
+            const action = 'fetching vehicle info';
+            return redirectToError(res, message, action);
+          });
+
+      });
+    }
+    else {
+      res.render('vehicles', { vehicles: req.session.vehicles })
+    }
 });
 
 /**
