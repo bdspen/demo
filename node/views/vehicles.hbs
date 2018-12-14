@@ -1,15 +1,19 @@
 <style>
   #map {
       flex: 2 0 0;
-      max-height: 500px;
-      margin-bottom: 10px;
+      border-radius: 5px;
+  }
+  #vehicle-info-wrapper {
+    flex-direction: column;
+    flex-grow: initial;
   }
   #vehicle-info {
     flex: 1 0 0;
     margin-left: 10px;
-    border-radius: 8px;
+    border-radius: 5px;
     background: white;
     color: #28293e;
+    padding: 10px;
   }
   #vehicle-select{
     max-width: 33%;
@@ -28,9 +32,8 @@
   var vehicles = '{{{ toJSON vehicles }}}';
   vehicles = JSON.parse(vehicles);
   var map;
-  console.log('vehicles', vehicles);
 
-  window.initMap = function () {
+  function initMap () {
     map = new google.maps.Map(document.getElementById('map'));
     var markers = generateMarkers(map);
     markers = addClickHandlers(map, markers);
@@ -41,7 +44,6 @@
   // Set up markers based on the number of elements within the myPoints array
   function generateMarkers(map) {
     return vehicles.map(function (vehicle) {
-      console.log('vehicle', vehicle);
       var myLatLng = new google.maps.LatLng(vehicle.location.latitude, vehicle.location.longitude);
       return new google.maps.Marker({
         position: myLatLng,
@@ -65,48 +67,118 @@
   function generateBounds(markers){
     var bounds = new google.maps.LatLngBounds();
     markers.forEach(function (marker) {
-      bounds.extend(marker.getPosition());
+      bounds.extend(marker.position);
     });
     return bounds;
   }
 
   function getVehicleById(vehicleId){
     return vehicles.find(function(vehicle){
-      return vehicle.id = vehicleId;
+      return vehicle.id === vehicleId;
     });
   }
 
-  function generateCarInfo(vehicleId){
-    var vehicle = getVehicleById(vehicleId);
-    console.log('vehicle', vehicle);
-    // var vInfoList = $('#vehicle-info');
-    $('#vehicle-title').text(vehicle.year + " " + vehicle.make + " " + vehicle.model);
-  }
-
-  function selectVehicleFromMap(marker) {
+  function selectVehicleFromMap(map, marker) {
     map.setZoom(15);
-    map.setCenter(marker.getPosition());
+    map.setCenter(marker.position);
     $('#vehicle-select').val(marker.id);
     selectVehicle(marker.id);
   }
 
   function selectVehicle (vehicleId) {
-    console.log('vehicleId', vehicleId);
-    generateCarInfo(vehicleId);
+    var vehicle = getVehicleById(vehicleId);
+    var myLatLng = new google.maps.LatLng(vehicle.location.latitude, vehicle.location.longitude);
+    map.setZoom(15);
+    map.setCenter(myLatLng);
+    $('#vehicle-info').show();
+    $('#vehicle-title').text('');
+    $('#vehicle-title').text(vehicle.year + " " + vehicle.make + " " + vehicle.model);
   }
+
+  function toggleLock(willUnlock){
+    console.log('willUnlock', willUnlock);
+    var vehicleId = $('#vehicle-select').val();
+    if(willUnlock){
+      //request to unlock
+      unlock(vehicleId);
+    }
+    else {
+      //request to lock
+      lock(vehicleId);
+    }
+  }
+
+  function unlock(vehicleId){
+    $.ajax({
+        type: "POST",
+        url: '/request',
+        data: {vehicleId: vehicleId, requestType: 'unlock'},
+        success: function(data){
+          showAlert("Unlock Request Sent!");
+        },
+        error: function (data) {
+          showAlert("Unlock Request Failed!");
+        },
+        dataType: 'json'
+      });
+  }
+
+  function lock(vehicleId) {
+    $.ajax({
+      type: "POST",
+      url: '/request',
+      data: { vehicleId: vehicleId, requestType: 'lock' },
+      success: function (data) {
+        showAlert("Lock Request Sent!");
+      },
+      error: function (data) {
+        showAlert("Lock Request Failed!");
+      },
+      dataType: 'json'
+    });
+  }
+
+  function showAlert(message) {
+      console.log('message', message);
+      $('#alert').text(message);
+      $('#alert').show();
+      setTimeout(function () {
+        $('#alert').hide();
+        $('#alert').text('');
+      }, 4000);
+    }
 
 </script>
 
-
+<h2>Select a vehicle</h2>
 <select onchange="selectVehicle(this.value);" class="form-control" id="vehicle-select" name="vehicleId">
+  <option value="" disabled selected>Select a Vehicle</option>
   {{#each vehicles}}
     <option value="{{id}}">{{year}} {{make}} {{model}}</option>
   {{/each}}
 </select>
 <div class="content">
   <div id="map"></div>
-  <div id="vehicle-info">
-    <h2 id="vehicle-title"></h2>
+  <div id="vehicle-info-wrapper">
+    <div id="vehicle-info" hidden="true">
+      <h2 id="vehicle-title"></h2>
+      <label class="checkbox">
+        <input
+          type="checkbox"
+          checked
+          data-toggle="toggle"
+          data-width="200"
+          data-on="PRESS TO LOCK"
+          data-off="PRESS TO UNLOCK"
+          data-onstyle="danger"
+          data-offstyle="success"
+          onchange="toggleLock(this.checked)"
+        >
+      </label>
+    </div>
+    <div id="vehicle-maintenance">
+    
+    </div>
   </div>
 </div>
 <a href="/logout" class="btn btn-link" role="button">Logout</a>

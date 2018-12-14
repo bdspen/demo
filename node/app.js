@@ -238,37 +238,32 @@ app.post('/request', function(req, res, next) {
     case 'lock':
       instance.lock()
         .then(function() {
-          res.render('data', {
-            // Lock and unlock requests do not return data if successful
-            data: {
-              action: 'Lock request sent.',
-            },
-            type,
+          console.log('lock success')
+          res.send({
             vehicle,
+            type,
+            data: {
+              action: "Lock request sent."
+            }
           });
         })
         .catch(function(err) {
-          const message = err.message || 'Failed to send lock request to vehicle.';
-          const action = 'locking vehicle';
-          return redirectToError(res, message, action);
+          res.send(400);
         });
       break;
     case 'unlock':
       instance.unlock()
         .then(function() {
-          res.render('data', {
+          res.send({
             vehicle,
             type,
-            // Lock and unlock requests do not return data if successful
             data: {
               action: 'Unlock request sent.',
             },
           });
         })
         .catch(function(err) {
-          const message = err.message || 'Failed to send unlock request to vehicle.';
-          const action = 'unlocking vehicle';
-          return redirectToError(res, message, action);
+          res.send(400);
         });
       break;
     default:

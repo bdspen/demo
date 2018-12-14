@@ -4,18 +4,36 @@
   <meta charset="utf-8">
   <title>Demo</title>
   <link rel="stylesheet" href="../../public/bootstrap.min.css">
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
-    crossorigin="anonymous"></script>
+  <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
   <style>
-    /* Optional: Makes the sample page fill the window. */
+
+    @font-face {
+      font-family: 'Sofia-Pro-Regular';
+      src: url('/public/fonts/sofia-pro-regular.otf');
+    }
+    @font-face {
+      font-family: 'Sofia-Pro-Black';
+      src: url('/public/fonts/sofia-pro-black.otf');
+    }
     html, body {
       height: 100%;
       margin: 20px;
       padding: 0;
       background: #28293e;
       color: white;
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: Sofia-Pro-Black;
     }
+
+  #alert{
+    position:absolute;
+    z-index:100;
+    width:400px;
+    font-size: 28px;
+    left:20px;
+    top:10%;
+  }
 
     #header {
       text-align: center;
@@ -41,7 +59,9 @@
     .container {
       height: 100%;
       width: 100%;
+      max-height: 600px;
       margin: 0;
+      margin-bottom: 10px;
       padding: 0;
     }
 
@@ -49,10 +69,13 @@
 </head>
 <body>
   <div class="container">
+    {{!-- alert --}}
+    <div class="alert alert-success" id="alert" hidden="true" role="alert"></div>
     <div id="header">
       <img src="/images/halo.full.logo.png" height="225">
       <h3 class="fleet">FLEET</h3>
     </div>
+
 
     {{{body}}}
 
